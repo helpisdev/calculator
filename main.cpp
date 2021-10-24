@@ -1,10 +1,9 @@
 #include "Calculator.hpp"
-#include <iostream>
 
-int main() {
+int main()
+{
+    const auto calculator = std::make_unique<Calculator>();
+    calculator->run();
 
-  Calculator *calculator = new Calculator();
-  calculator->run();
-
-  return 0;
+    return 0;
 }
