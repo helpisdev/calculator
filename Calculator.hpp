@@ -5,9 +5,20 @@
 #ifndef CALCULATOR_CALCULATOR_HPP
 #define CALCULATOR_CALCULATOR_HPP
 
+#include "Token.hpp"
+#include <memory>
+#include <queue>
 
-class Calculator {
+class Calculator
+{
+private:
+    double primary();
+    double term();
+    double expression();
+
+public:
+    Calculator();
+    void run();
 };
 
-
-#endif//CALCULATOR_CALCULATOR_HPP
+#endif //CALCULATOR_CALCULATOR_HPP
