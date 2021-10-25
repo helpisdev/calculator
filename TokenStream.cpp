@@ -5,20 +5,17 @@
 #include "TokenStream.hpp"
 #include "InputSpecialValue.hpp"
 #include <iostream>
+#include <memory>
 
 TokenStream::TokenStream() = default;
 
-void TokenStream::pollForInput(std::mutex& mutex, std::condition_variable& poll, const bool& should_poll)
+void TokenStream::pollForInput()
 {
-    do {
-        std::unique_lock lock(mutex);
-        g_clear_queue(*this->tokens_);
-        this->getInput();
-        this->tokenizeInput();
-        poll.wait(lock, [&should_poll]() {
-            return should_poll;
-        });
-    } while (!this->should_exit_program_);
+    this->buffer_.reset();
+    this->is_buffer_full_ = false;
+    g_clear_queue(*this->tokens_);
+    this->getInput();
+    this->tokenizeInput();
 }
 
 void TokenStream::getInput()
@@ -71,25 +68,43 @@ void TokenStream::tokenizeInput() const
                 this->tokens_->push(Token(token));
             }
             token = character;
-            this->tokens_->push(Token(token));
-            token.clear();
+            if (!this->tokens_->empty()) {
+                this->tokens_->push(Token(token));
+                token.clear();
+            }
         }
+    }
+
+    if (!token.empty()) {
+        this->tokens_->push(Token(token));
+        token.clear();
     }
 }
 
-const Token& TokenStream::getToken()
+Token TokenStream::getToken()
 {
     if (this->is_buffer_full_) {
         this->is_buffer_full_ = false;
-        const Token& token_buffer = *this->buffer_;
-        this->buffer_ = nullptr;
+        Token token_buffer = *this->buffer_;
+        this->buffer_.reset();
         return token_buffer;
     }
-    return this->tokens_->front();
+    Token token = this->tokens_->front();
+    this->tokens_->pop();
+    return token;
 }
 
-void TokenStream::putback(const Token* token)
+void TokenStream::putback(std::unique_ptr<Token> token)
 {
-    this->buffer_ = token;
+    this->buffer_ = std::make_unique<Token>(*token);
     this->is_buffer_full_ = true;
+}
+
+bool TokenStream::getExitStatus() const
+{
+    return this->should_exit_program_;
+}
+bool TokenStream::getCalculationStatus() const
+{
+    return !this->tokens_->empty();
 }

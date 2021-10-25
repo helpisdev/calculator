@@ -6,15 +6,20 @@
 #define CALCULATOR_CALCULATOR_HPP
 
 #include "Token.hpp"
+#include "TokenStream.hpp"
+#include <condition_variable>
 #include <memory>
-#include <queue>
+#include <mutex>
 
 class Calculator
 {
 private:
-    double primary();
-    double term();
-    double expression();
+    TokenStream token_stream_{ TokenStream() };
+
+    [[nodiscard]] double primary();
+    [[nodiscard]] double term();
+    [[nodiscard]] double expression();
+    void calculate();
 
 public:
     Calculator();

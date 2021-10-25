@@ -17,7 +17,7 @@ private:
     const std::unique_ptr<std::queue<Token>> tokens_{ std::make_unique<std::queue<Token>>() };
     std::string input_;
     bool is_buffer_full_{ false };
-    const Token* buffer_{ nullptr };
+    std::unique_ptr<Token> buffer_{ nullptr };
     bool should_exit_program_{ false };
 
     void getInput();
@@ -25,9 +25,11 @@ private:
 
 public:
     TokenStream();
-    void pollForInput(std::mutex& mutex, std::condition_variable& poll, const bool& should_poll);
-    [[nodiscard]] const Token& getToken();
-    void putback(const Token* token);
+    void pollForInput();
+    [[nodiscard]] Token getToken();
+    void putback(std::unique_ptr<Token> token);
+    [[nodiscard]] bool getExitStatus() const;
+    [[nodiscard]] bool getCalculationStatus() const;
 };
 
 template <typename T>

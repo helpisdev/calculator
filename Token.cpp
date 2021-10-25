@@ -4,6 +4,7 @@
 
 #include "Token.hpp"
 #include <stdexcept>
+#include <utility>
 
 Token::Token(const std::string& input)
 {
@@ -54,4 +55,16 @@ const TokenType& Token::getType() const
 double Token::getValue() const
 {
     return this->value_;
+}
+
+Token& Token::operator=(const Token& other_token) noexcept
+{
+    if (this == &other_token) {
+        return *this;
+    }
+
+    this->value_ = other_token.value_;
+    this->type_ = other_token.type_;
+
+    return *this;
 }
